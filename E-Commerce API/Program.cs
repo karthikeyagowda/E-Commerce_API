@@ -1,9 +1,18 @@
+using E_Commerce_API.Logging;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
+Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().
+    WriteTo.File("log/productLogs.txt", rollingInterval:RollingInterval.Day).CreateLogger();
+builder.Host.UseSerilog();
+builder.Services.AddControllers(option =>
+{
+    option.ReturnHttpNotAcceptable = true;
+}).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddSingleton<ILogging, Logging>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
